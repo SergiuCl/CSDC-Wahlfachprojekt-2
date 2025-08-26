@@ -5,9 +5,9 @@ services:
   juice-shop:
     image: bkimminich/juice-shop
     ports:
-      - "3000:3000"              # Expose Juice Shop on localhost:3000
+      - "3000:3000"
     networks:
-      - zap-network               # Connect to shared network (added this for consistency)
+      - zap-network
 
   # ZAP with Web UI for manual testing and learning
   zap-ui:
@@ -22,35 +22,43 @@ services:
   baseline-scan:
     image: zaproxy/zap-stable
     volumes:
-      - ./reports:/zap/wrk:rw    # Mount local ./reports folder to save scan results
-      # Creates 'reports' folder in current directory if not exists
-    command: zap-baseline.py -t http://juice-shop:3000 -r baseline-report.html
-    #        ^ Script to run    ^ Target URL using container name   ^ Output file
+      - ./reports:/zap/wrk:rw    # Mount reports folder
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      DATE=$$(date +%Y-%m-%d);
+      NUM=1;
+      while [ -d /zap/wrk/report-$$DATE-$$NUM ]; do
+        NUM=$$((NUM + 1));
+      done;
+      DIR=report-$$DATE-$$NUM;
+      mkdir -p /zap/wrk/$$DIR;
+      echo 'Creating report in: /zap/wrk/'$$DIR;
+      zap-baseline.py -t http://juice-shop:3000 -r $$DIR/baseline-report.html -w $$DIR/baseline-report.md -J $$DIR/baseline-report.json
+      "
     profiles:
-      - scan                     # Only runs when --profile scan is specified
-      # Prevents automatic start with docker-compose up
-    networks:
-      - zap-network             # Same network to reach juice-shop by name
-
-  # Full scan service - active attacks (finds real vulnerabilities)
-  full-scan:
-    image: zaproxy/zap-stable
-    volumes:
-      - ./reports:/zap/wrk:rw   # Same volume mount for reports
-    command: zap-full-scan.py -t http://juice-shop:3000 -r full-scan-report.html -m 10
-    #        ^ Active scanner    ^ Target               ^ Report name        ^ Max 10 min timeout
-    profiles:
-      - scan                    # Only runs with --profile scan flag
+      - scan
     networks:
       - zap-network
 
-  # Optional: Add API scan service for Phase 2 of your project
-  api-scan:
+  # Full scan service
+  full-scan:
     image: zaproxy/zap-stable
     volumes:
       - ./reports:/zap/wrk:rw
-    command: zap-api-scan.py -t http://juice-shop:3000/api-docs -f openapi -r api-scan-report.html
-    #        ^ API scanner      ^ OpenAPI/Swagger URL        ^ Format  ^ Report
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      DATE=$$(date +%Y-%m-%d);
+      NUM=1;
+      while [ -d /zap/wrk/report-$$DATE-$$NUM ]; do
+        NUM=$$((NUM + 1));
+      done;
+      DIR=report-$$DATE-$$NUM;
+      mkdir -p /zap/wrk/$$DIR;
+      echo 'Creating report in: /zap/wrk/'$$DIR;
+      zap-full-scan.py -t http://juice-shop:3000 -r $$DIR/full-scan-report.html -w $$DIR/full-scan-report.md -J $$DIR/full-scan-report.json -m 10
+      "
     profiles:
       - scan
     networks:
