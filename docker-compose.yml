@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   # Target application to be scanned
@@ -18,7 +18,7 @@ services:
     networks:
       - zap-network              # Connect to shared network for container communication
 
-  # Baseline scan service - passive scanning only (safe, fast)
+  # Baseline scan service with Ajax Spider - passive scanning only (safe, fast)
   baseline-scan:
     image: zaproxy/zap-stable
     volumes:
@@ -34,14 +34,19 @@ services:
       DIR=report-$$DATE-$$NUM;
       mkdir -p /zap/wrk/$$DIR;
       echo 'Creating report in: /zap/wrk/'$$DIR;
-      zap-baseline.py -t http://juice-shop:3000 -r $$DIR/baseline-report.html -w $$DIR/baseline-report.md -J $$DIR/baseline-report.json
+      echo 'Starting baseline scan with AJAX Spider enabled...';
+      zap-baseline.py -t http://juice-shop:3000 \
+        -r $$DIR/baseline-report.html \
+        -w $$DIR/baseline-report.md \
+        -J $$DIR/baseline-report.json \
+        -j
       "
     profiles:
       - scan
     networks:
       - zap-network
 
-  # Full scan service
+  # Full scan service with Ajax Spider
   full-scan:
     image: zaproxy/zap-stable
     volumes:
@@ -57,7 +62,13 @@ services:
       DIR=report-$$DATE-$$NUM;
       mkdir -p /zap/wrk/$$DIR;
       echo 'Creating report in: /zap/wrk/'$$DIR;
-      zap-full-scan.py -t http://juice-shop:3000 -r $$DIR/full-scan-report.html -w $$DIR/full-scan-report.md -J $$DIR/full-scan-report.json -m 10
+      echo 'Starting full scan with AJAX Spider (this will take 10-15 minutes)...';
+      zap-full-scan.py -t http://juice-shop:3000 \
+        -r $$DIR/full-scan-report.html \
+        -w $$DIR/full-scan-report.md \
+        -J $$DIR/full-scan-report.json \
+        -m 10 \
+        -j
       "
     profiles:
       - scan

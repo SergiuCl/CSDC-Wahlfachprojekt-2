@@ -27,21 +27,21 @@ jobs:
 - parameters:
     reportDescription: ''
     reportDir: /zap/wrk/
-    reportFile: report-2025-08-26-1/baseline-report.html
+    reportFile: report-2025-08-27-2/baseline-report.html
     reportTitle: ZAP Scanning Report
     template: traditional-html
   type: report
 - parameters:
     reportDescription: ''
     reportDir: /zap/wrk/
-    reportFile: report-2025-08-26-1/baseline-report.md
+    reportFile: report-2025-08-27-2/baseline-report.md
     reportTitle: ZAP Scanning Report
     template: traditional-md
   type: report
 - parameters:
     reportDescription: ''
     reportDir: /zap/wrk/
-    reportFile: report-2025-08-26-1/baseline-report.json
+    reportFile: report-2025-08-27-2/baseline-report.json
     reportTitle: ZAP Scanning Report
     template: traditional-json
   type: report
