@@ -1,0 +1,73 @@
+plan:
+  title: "M@RS AF API Scan"
+  description: "Scan via OpenAPI definition"
+  version: "1.0.0"
+
+env:
+  contexts:
+    - name: M@RS
+      urls:
+        - ${TARGET_URL}/
+      includePaths:
+        - ${TARGET_URL}/.*
+      authentication:
+        method: form
+        parameters:
+          loginPageUrl: ${TARGET_URL}/login/login.xhtml
+          loginRequestUrl: ${TARGET_URL}/login/login.xhtml
+          loginRequestBody: 'loginguest=loginguest&loginguest:loginForm=loginguest:loginForm&loginguest:loginName={%username%}&loginguest:password={%password%}&loginguest:j_idt150=Sign+In&jakarta.faces.ViewState=stateless'
+        verification:
+          method: response
+          loggedInRegex: '\QLogout\E'
+          loggedOutRegex: '\QLogin\E'
+      sessionManagement:
+        method: cookie
+      # To remember: I can use multiple users for running different scans. Maybe one admin, one regular
+      users:
+        - name: si_owasp_user
+          credentials:
+            username: si_owasp_user
+            password: TestPassword123!
+  parameters:
+    failOnError: true
+    failOnWarning: false
+
+jobs:
+  - type: openapi
+    parameters:
+      context: M@RS # String: Context to use when importing the OpenAPI definition, default: first context.
+      # apiFile: String: Local file containing the OpenAPI definition, default: null, no definition will be imported
+      user: si_owasp_user # String: An optional user to use for authentication, must be defined in the env.
+      apiUrl: "${OPENAPI_URL}" # String: URL containing the OpenAPI definition, default: null, no definition will be imported
+      # targetUrl: "${TARGET_URL}/REST" URL which overrides the target defined in the definition, default: null, the target will not be overridden
+
+  # Export URLs discovered from OpenAPI
+  - type: export
+    parameters:
+      type: 'url'
+      fileName: "${REPORT_DIR}/urls-after-openapi.txt"
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportDir: "${REPORT_DIR}"
+      reportFile: "api-scan-report.html"
+      reportTitle: "ZAP AF API Scan - M@RS"
+
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportDir: "${REPORT_DIR}"
+      reportFile: "api-scan-report.json"
+      reportTitle: "ZAP AF API Scan - M@RS"
+
+  - type: report
+    parameters:
+      template: "traditional-md"
+      reportDir: "${REPORT_DIR}"
+      reportFile: "api-scan-report.md"
+      reportTitle: "ZAP AF API Scan - M@RS"

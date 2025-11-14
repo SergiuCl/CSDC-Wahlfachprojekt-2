@@ -1,0 +1,210 @@
+services:
+  # ZAP with Web UI for manual testing and learning
+  zap-ui:
+    image: zaproxy/zap-stable
+    command: zap-webswing.sh      # Start ZAP with web-based GUI
+    ports:
+      - "8080:8080"              # Access ZAP UI at http://localhost:8080/zap/
+    networks:
+      - zap-network
+    # Allow access to host network to reach localhost:8082
+    # Adds custom DNS hostname-to-IP mappings inside the Docker container
+    # host-gateway is a special Docker keyword that automatically resolves to your host machine's IP address from the container's perspective
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/zap/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # =================================================================
+  # Generic AF runner (uses a generated plan file path via PLAN_FILE)
+  # This is the main service used by runZapAF.groovy
+  # =================================================================
+  zap-af:
+    image: zaproxy/zap-stable
+    volumes:
+      - ./reports:/zap/wrk/reports:rw
+      - ./zap-plans:/zap/wrk/zap-plans:rw
+      - ./api-specs:/zap/wrk/api-specs:ro
+    entrypoint: /bin/bash
+    command: >
+      -c "
+       test -n \"$$PLAN_FILE\" && /zap/zap.sh -cmd -autorun \"$$PLAN_FILE\" || { echo 'PLAN_FILE not set'; exit 2; }
+       "
+    environment:
+      - JAVA_OPTS=-Xmx2048m
+    profiles:
+      - af
+    dns:
+      - 10.33.246.71 # mediamid DNS
+    networks:
+      - zap-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ========================================
+  # Services for manual Docker Compose usage
+  # ========================================
+  baseline-scan:
+    image: zaproxy/zap-stable
+    volumes:
+      - ./reports:/zap/wrk:rw
+      - ./scripts:/zap/scripts:rw
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      
+      DATE=$$(date +%Y-%m-%d);
+      NUM=1;
+      while [ -d /zap/wrk/report-$$DATE-$$NUM ]; do
+        NUM=$$((NUM + 1));
+      done;
+      DIR=report-$$DATE-$$NUM;
+      mkdir -p /zap/wrk/$$DIR;
+      echo 'Creating report in: /zap/wrk/'$$DIR;
+      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      zap-baseline.py -t ${TARGET_URL:-http://host.docker.internal:8082/marsDemo} -r $$DIR/baseline-report.html -w $$DIR/baseline-report.md -J $$DIR/baseline-report.json -x $$DIR/baseline-report.xml
+      "
+    profiles:
+      - scan
+    dns:
+      - 10.33.246.71 # mediamid DNS
+    networks:
+      - zap-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Full scan service for M@RS application
+  full-scan:
+    image: zaproxy/zap-stable
+    volumes:
+      - ./reports:/zap/wrk:rw
+      - ./scripts:/zap/scripts:rw # Mount scripts folder
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      
+      DATE=$$(date +%Y-%m-%d);
+      NUM=1;
+      while [ -d /zap/wrk/report-$$DATE-$$NUM ]; do
+        NUM=$$((NUM + 1));
+      done;
+      DIR=report-$$DATE-$$NUM;
+      mkdir -p /zap/wrk/$$DIR;
+      echo 'Creating full scan report in: /zap/wrk/'$$DIR;
+      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      zap-full-scan.py -t ${TARGET_URL:-http://host.docker.internal:8082/marsDemo} -r $$DIR/full-scan-report.html -w $$DIR/full-scan-report.md -J $$DIR/full-scan-report.json -x $$DIR/full-scan-report.xml
+      "
+    profiles:
+      - full-scan
+    dns:
+      - 10.33.246.71 # mediamid DNS
+    networks:
+      - zap-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Authenticated baseline scan - uses context file with authentication
+  # Authenticated baseline scan - uses context file with authentication
+  authenticated-baseline-scan:
+    image: zaproxy/zap-stable
+    volumes:
+      - ./reports:/zap/wrk:rw
+      - ./scripts:/zap/scripts:rw
+      - ./zap-plans:/zap/wrk/zap-plans:ro
+    entrypoint: /bin/bash
+    command: >
+      -c "
+
+      DATE=$$(date +%Y-%m-%d);
+      NUM=1;
+      while [ -d /zap/wrk/report-$$DATE-$$NUM ]; do
+        NUM=$$((NUM + 1));
+      done;
+      DIR=report-$$DATE-$$NUM;
+      mkdir -p /zap/wrk/$$DIR;
+      echo 'Creating authenticated baseline scan report in: /zap/wrk/'$$DIR;
+      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      sed \"s|reportDir: /zap/wrk|reportDir: /zap/wrk/$$DIR|g\" /zap/wrk/zap-plans/plan.auth-baseline.template.yaml > /tmp/plan.auth-baseline.template-tmp.yaml;
+      /zap/zap.sh -cmd -autorun /tmp/plan.auth-baseline.template-tmp.yaml
+      "
+    profiles:
+      - auth-scan
+    dns:
+      - 10.33.246.71 # mediamid DNS
+    networks:
+      - zap-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Authenticated full scan - uses context file with authentication
+  authenticated-full-scan:
+    image: zaproxy/zap-stable
+    volumes:
+      - ./reports:/zap/wrk:rw
+      - ./scripts:/zap/scripts:rw
+      - ./zap-plans:/zap/wrk/zap-plans:ro
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      
+      DATE=$$(date +%Y-%m-%d);
+      NUM=1;
+      while [ -d /zap/wrk/report-$$DATE-$$NUM ]; do
+        NUM=$$((NUM + 1));
+      done;
+      DIR=report-$$DATE-$$NUM;
+      mkdir -p /zap/wrk/$$DIR;
+      echo 'Creating authenticated full scan report in: /zap/wrk/'$$DIR;
+      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      sed \"s|reportDir: /zap/wrk|reportDir: /zap/wrk/$$DIR|g\" /zap/wrk/zap-plans/plan.auth-full.template.yaml > /tmp/plan.auth-full.template-tmp.yaml;
+      /zap/zap.sh -cmd -autorun /tmp/plan.auth-full.template-tmp.yaml
+      "
+    profiles:
+      - auth-full-scan
+    dns:
+      - 10.33.246.71 # mediamid DNS
+    networks:
+      - zap-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # API scan service (for when you implement OpenAPI in Phase 2)
+  api-scan:
+    image: zaproxy/zap-stable
+    volumes:
+      - ./reports:/zap/wrk:rw
+      - ./api-specs:/zap/api-specs:ro
+      - ./scripts:/zap/scripts:rw
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      
+      DATE=$$(date +%Y-%m-%d);
+      NUM=1;
+      while [ -d /zap/wrk/report-$$DATE-$$NUM ]; do
+        NUM=$$((NUM + 1));
+      done;
+      DIR=report-$$DATE-$$NUM;
+      mkdir -p /zap/wrk/$$DIR;
+      echo 'Creating API scan report in: /zap/wrk/'$$DIR;
+      echo 'API scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      # This will be used later when you have OpenAPI specs
+      # zap-api-scan.py -t ${TARGET_URL:-http://host.docker.internal:8082/marsDemo} -f openapi -d /zap/api-specs/mars-openapi.yml -r $$DIR/api-scan-report.html -w $$DIR/api-scan-report.md -J $$DIR/api-scan-report.json
+      echo 'API scan service ready - add OpenAPI spec to ./api-specs/ folder and uncomment the scan command'
+      "
+    profiles:
+      - api-scan
+    dns:
+      - 10.33.246.71 # mediamid DNS
+    networks:
+      - zap-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  zap-network:
+    driver: bridge
