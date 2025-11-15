@@ -21,7 +21,7 @@ DEFAULT_TIMEOUT=60
 DEFAULT_INTERVAL=2
 
 # Parse arguments
-TARGET_URL="${1:-http://host.docker.internal:8082/marsDemo}"
+TARGET_URL="${1:-https://127.0.0.1:8443/benchmark}"
 TIMEOUT="${2:-$DEFAULT_TIMEOUT}"
 INTERVAL="${3:-$DEFAULT_INTERVAL}"
 

@@ -1,33 +1,13 @@
 plan:
-  title: "M@RS Authenticated Baseline"
-  description: "Authenticated passive scan (no active attacks)"
+  title: "M@RS AF Baseline"
+  description: "Passive scan (no active attacks)"
   version: "1.0.0"
 
 env:
   contexts:
-    - name: M@RS
+    - name: "mars"
       urls:
-        - http://t-si.mediamid.local:8082/marsDemo/
-      includePaths:
-        - http://t-si.mediamid.local:8082/marsDemo/.*
-      authentication:
-        method: form
-        parameters:
-          loginPageUrl: http://t-si.mediamid.local:8082/marsDemo/login/login.xhtml
-          loginRequestUrl: http://t-si.mediamid.local:8082/marsDemo/login/login.xhtml
-          loginRequestBody: 'loginguest=loginguest&loginguest:loginForm=loginguest:loginForm&loginguest:loginName={%username%}&loginguest:password={%password%}&loginguest:j_idt150=Sign+In&jakarta.faces.ViewState=stateless'
-        verification:
-          method: response
-          loggedInRegex: '\QLogout\E'
-          loggedOutRegex: '\QLogin\E'
-      sessionManagement:
-        method: cookie
-      # To remember: I can use multiple users for running different scans. Maybe one admin, one regular
-      users:
-        - name: si_owasp_user
-          credentials:
-            username: si_owasp_user
-            password: TestPassword123!
+        - "https://127.0.0.1:8443/benchmark"
   parameters:
     failOnError: true
     failOnWarning: false
@@ -35,15 +15,13 @@ env:
 jobs:
   - type: spider
     parameters:
-      context: M@RS
-      user: si_owasp_user
-      maxDuration: 5
+      context: "mars"
+      maxDuration: 2
 
   - type: spiderAjax
     parameters:
-      context: M@RS
-      user: si_owasp_user
-      maxDuration: 5
+      context: "mars"
+      maxDuration: 2
 
   - type: passiveScan-wait
     parameters:
@@ -51,33 +29,26 @@ jobs:
 
   - type: report
     parameters:
-      template: traditional-html
-      reportDir: /zap/wrk/reports/report-2025-11-14-4
-      reportFile: auth-baseline-report.html
-      reportTitle: "ZAP Authenticated Baseline - M@RS"
+      template: "traditional-html"
+      reportDir: "/zap/wrk/reports/report-2025-11-15-3"
+      reportFile: "baseline-report.html"
+      reportTitle: "ZAP AF Baseline - M@RS"
 
   - type: report
     parameters:
-      template: traditional-json
-      reportDir: /zap/wrk/reports/report-2025-11-14-4
-      reportFile: auth-baseline-report.json
-      reportTitle: "ZAP Authenticated Baseline - M@RS"
+      template: "traditional-json"
+      reportDir: "/zap/wrk/reports/report-2025-11-15-3"
+      reportFile: "baseline-report.json"
+      reportTitle: "ZAP AF Baseline - M@RS"
 
   - type: report
     parameters:
-      template: traditional-md
-      reportDir: /zap/wrk/reports/report-2025-11-14-4
-      reportFile: auth-baseline-report.md
-      reportTitle: "ZAP Authenticated Baseline - M@RS"
-
-  - type: report
-    parameters:
-      template: traditional-xml
-      reportDir: /zap/wrk/reports/report-2025-11-14-4
-      reportFile: auth-baseline-report.xml
-      reportTitle: "ZAP Authenticated Baseline - M@RS"
+      template: "traditional-md"
+      reportDir: "/zap/wrk/reports/report-2025-11-15-3"
+      reportFile: "baseline-report.md"
+      reportTitle: "ZAP AF Baseline - M@RS"
 
   - type: outputSummary
     parameters:
       format: LONG
-      summaryFile: /zap/wrk/reports/report-2025-11-14-4/auth-baseline-summary.json
+      summaryFile: "/zap/wrk/reports/report-2025-11-15-3/baseline-summary.json"

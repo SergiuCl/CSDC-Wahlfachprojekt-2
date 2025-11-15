@@ -14,7 +14,7 @@ if (!["baseline","full","api","authenticated-baseline-scan","authenticated-full-
     System.exit(1)
 }
 
-final target = (args.length > 1 ? args[1] : null) ?: System.getenv('TARGET_URL') ?: 'http://host.docker.internal:8082/marsDemo'
+final target = (args.length > 1 ? args[1] : null) ?: System.getenv('TARGET_URL') ?: 'https://127.0.0.1:8443/benchmark'
 final composeFile = 'docker-compose-mars-scan.yml'
 
 // ============================================
@@ -67,14 +67,14 @@ def waitForApplication(String url, int timeoutSeconds = 60, int intervalSeconds 
     return false
 }
 
-if (!waitForApplication(target)) {
+/*if (!waitForApplication(target)) {
     System.err.println "ERROR: Cannot reach target application at ${target}"
     System.err.println "Please ensure:"
     System.err.println "  1. M@RS application is running"
     System.err.println "  2. URL is correct: ${target}"
     System.err.println "  3. Network connectivity is working"
     System.exit(1)
-}
+}*/
 
 // Setup report directory
 def root = new File('reports'); root.mkdirs()

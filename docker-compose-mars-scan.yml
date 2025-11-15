@@ -13,7 +13,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/zap/"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/zap/"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -38,8 +38,6 @@ services:
       - JAVA_OPTS=-Xmx2048m
     profiles:
       - af
-    dns:
-      - 10.33.246.71 # mediamid DNS
     networks:
       - zap-network
     extra_hosts:
@@ -65,13 +63,11 @@ services:
       DIR=report-$$DATE-$$NUM;
       mkdir -p /zap/wrk/$$DIR;
       echo 'Creating report in: /zap/wrk/'$$DIR;
-      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
-      zap-baseline.py -t ${TARGET_URL:-http://host.docker.internal:8082/marsDemo} -r $$DIR/baseline-report.html -w $$DIR/baseline-report.md -J $$DIR/baseline-report.json -x $$DIR/baseline-report.xml
+      echo 'Scanning M@RS application at: ${TARGET_URL:-https://127.0.0.1:8443/benchmark}';
+      zap-baseline.py -t ${TARGET_URL:-https://127.0.0.1:8443/benchmark} -r $$DIR/baseline-report.html -w $$DIR/baseline-report.md -J $$DIR/baseline-report.json -x $$DIR/baseline-report.xml
       "
     profiles:
       - scan
-    dns:
-      - 10.33.246.71 # mediamid DNS
     networks:
       - zap-network
     extra_hosts:
@@ -95,13 +91,11 @@ services:
       DIR=report-$$DATE-$$NUM;
       mkdir -p /zap/wrk/$$DIR;
       echo 'Creating full scan report in: /zap/wrk/'$$DIR;
-      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
-      zap-full-scan.py -t ${TARGET_URL:-http://host.docker.internal:8082/marsDemo} -r $$DIR/full-scan-report.html -w $$DIR/full-scan-report.md -J $$DIR/full-scan-report.json -x $$DIR/full-scan-report.xml
+      echo 'Scanning M@RS application at: ${TARGET_URL:-https://127.0.0.1:8443/benchmark}';
+      zap-full-scan.py -t ${TARGET_URL:-https://127.0.0.1:8443/benchmark} -r $$DIR/full-scan-report.html -w $$DIR/full-scan-report.md -J $$DIR/full-scan-report.json -x $$DIR/full-scan-report.xml
       "
     profiles:
       - full-scan
-    dns:
-      - 10.33.246.71 # mediamid DNS
     networks:
       - zap-network
     extra_hosts:
@@ -127,14 +121,12 @@ services:
       DIR=report-$$DATE-$$NUM;
       mkdir -p /zap/wrk/$$DIR;
       echo 'Creating authenticated baseline scan report in: /zap/wrk/'$$DIR;
-      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      echo 'Scanning M@RS application at: ${TARGET_URL:-https://127.0.0.1:8443/benchmark}';
       sed \"s|reportDir: /zap/wrk|reportDir: /zap/wrk/$$DIR|g\" /zap/wrk/zap-plans/plan.auth-baseline.template.yaml > /tmp/plan.auth-baseline.template-tmp.yaml;
       /zap/zap.sh -cmd -autorun /tmp/plan.auth-baseline.template-tmp.yaml
       "
     profiles:
       - auth-scan
-    dns:
-      - 10.33.246.71 # mediamid DNS
     networks:
       - zap-network
     extra_hosts:
@@ -159,14 +151,12 @@ services:
       DIR=report-$$DATE-$$NUM;
       mkdir -p /zap/wrk/$$DIR;
       echo 'Creating authenticated full scan report in: /zap/wrk/'$$DIR;
-      echo 'Scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      echo 'Scanning M@RS application at: ${TARGET_URL:-https://127.0.0.1:8443/benchmark}';
       sed \"s|reportDir: /zap/wrk|reportDir: /zap/wrk/$$DIR|g\" /zap/wrk/zap-plans/plan.auth-full.template.yaml > /tmp/plan.auth-full.template-tmp.yaml;
       /zap/zap.sh -cmd -autorun /tmp/plan.auth-full.template-tmp.yaml
       "
     profiles:
       - auth-full-scan
-    dns:
-      - 10.33.246.71 # mediamid DNS
     networks:
       - zap-network
     extra_hosts:
@@ -191,15 +181,13 @@ services:
       DIR=report-$$DATE-$$NUM;
       mkdir -p /zap/wrk/$$DIR;
       echo 'Creating API scan report in: /zap/wrk/'$$DIR;
-      echo 'API scanning M@RS application at: ${TARGET_URL:-http://host.docker.internal:8082/marsDemo}';
+      echo 'API scanning M@RS application at: ${TARGET_URL:-https://127.0.0.1:8443/benchmark}';
       # This will be used later when you have OpenAPI specs
-      # zap-api-scan.py -t ${TARGET_URL:-http://host.docker.internal:8082/marsDemo} -f openapi -d /zap/api-specs/mars-openapi.yml -r $$DIR/api-scan-report.html -w $$DIR/api-scan-report.md -J $$DIR/api-scan-report.json
+      # zap-api-scan.py -t ${TARGET_URL:-https://127.0.0.1:8443/benchmark} -f openapi -d /zap/api-specs/mars-openapi.yml -r $$DIR/api-scan-report.html -w $$DIR/api-scan-report.md -J $$DIR/api-scan-report.json
       echo 'API scan service ready - add OpenAPI spec to ./api-specs/ folder and uncomment the scan command'
       "
     profiles:
       - api-scan
-    dns:
-      - 10.33.246.71 # mediamid DNS
     networks:
       - zap-network
     extra_hosts:
