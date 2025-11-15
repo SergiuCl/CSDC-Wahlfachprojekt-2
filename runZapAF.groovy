@@ -14,7 +14,7 @@ if (!["baseline","full","api","authenticated-baseline-scan","authenticated-full-
     System.exit(1)
 }
 
-final target = (args.length > 1 ? args[1] : null) ?: System.getenv('TARGET_URL') ?: 'https://127.0.0.1:8443/benchmark'
+final target = (args.length > 1 ? args[1] : null) ?: System.getenv('TARGET_URL') ?: 'https://host.docker.internal:8443/benchmark'
 final composeFile = 'docker-compose-mars-scan.yml'
 
 // ============================================

@@ -7,7 +7,7 @@ env:
   contexts:
     - name: "mars"
       urls:
-        - "https://127.0.0.1:8443/benchmark"
+        - "https://host.docker.internal:8443/benchmark"
   parameters:
     failOnError: true
     failOnWarning: false
@@ -30,25 +30,25 @@ jobs:
   - type: report
     parameters:
       template: "traditional-html"
-      reportDir: "/zap/wrk/reports/report-2025-11-15-3"
+      reportDir: "/zap/wrk/reports/report-2025-11-15-4"
       reportFile: "baseline-report.html"
       reportTitle: "ZAP AF Baseline - M@RS"
 
   - type: report
     parameters:
       template: "traditional-json"
-      reportDir: "/zap/wrk/reports/report-2025-11-15-3"
+      reportDir: "/zap/wrk/reports/report-2025-11-15-4"
       reportFile: "baseline-report.json"
       reportTitle: "ZAP AF Baseline - M@RS"
 
   - type: report
     parameters:
       template: "traditional-md"
-      reportDir: "/zap/wrk/reports/report-2025-11-15-3"
+      reportDir: "/zap/wrk/reports/report-2025-11-15-4"
       reportFile: "baseline-report.md"
       reportTitle: "ZAP AF Baseline - M@RS"
 
   - type: outputSummary
     parameters:
       format: LONG
-      summaryFile: "/zap/wrk/reports/report-2025-11-15-3/baseline-summary.json"
+      summaryFile: "/zap/wrk/reports/report-2025-11-15-4/baseline-summary.json"
