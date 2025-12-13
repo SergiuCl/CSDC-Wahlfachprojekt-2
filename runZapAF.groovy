@@ -5,7 +5,7 @@
 //   groovy runZapAF.groovy baseline http://t-si.mediamid.local:8082/marsDemo
 //
 // Optional when running:
-//   TARGET_URL=http://host.docker.internal:8082/marsDemo groovy runZapAF.groovy full
+//   TARGET_URL=https://host.docker.internal:8443/benchmark/ groovy runZapAF.groovy full
 //   OPENAPI_FILE=/zap/wrk/api-specs/mars-openapi.yml  (only for 'api')
 
 def kind = (args.length > 0 ? args[0] : null)
@@ -14,12 +14,9 @@ if (!["baseline","full","api","authenticated-baseline-scan","authenticated-full-
     System.exit(1)
 }
 
-final target = (args.length > 1 ? args[1] : null) ?: System.getenv('TARGET_URL') ?: 'https://host.docker.internal:8443/benchmark'
+final target = (args.length > 1 ? args[1] : null) ?: System.getenv('TARGET_URL') ?: 'https://host.docker.internal:8443/benchmark/'
 final composeFile = 'docker-compose-mars-scan.yml'
 
-// ============================================
-// Wait for application to be ready
-// ============================================
 def waitForApplication(String url, int timeoutSeconds = 60, int intervalSeconds = 2) {
     println "\n============================================"
     println "Checking Application Availability"
@@ -36,21 +33,18 @@ def waitForApplication(String url, int timeoutSeconds = 60, int intervalSeconds 
     while (System.currentTimeMillis() < endTime) {
         attempt++
         try {
-            def connection = new URL(url).openConnection()
-            connection.setConnectTimeout(5000)
-            connection.setReadTimeout(5000)
-            connection.setRequestMethod("GET")
+            // curl: -k ignores TLS cert errors, -L follows redirects, -o NUL discards body
+            def cmd = ["cmd", "/c", "curl", "-k", "-s", "-L", "-o", "NUL", "-w", "%{http_code}", url]
+            def p = new ProcessBuilder(cmd).redirectErrorStream(true).start()
+            def out = p.inputStream.text.trim()
+            p.waitFor()
 
-            def responseCode = connection.responseCode
-
-            if (responseCode in [200, 301, 302, 303, 307, 308]) {
-                println "Application is ready! (HTTP ${responseCode})"
-                println "  Attempts: ${attempt}"
-                println "  Time: ${(System.currentTimeMillis() - startTime) / 1000}s"
+            if (out.isInteger() && out.toInteger() in [200, 301, 302, 303, 307, 308]) {
+                println "Application is ready! (HTTP ${out})"
                 println "============================================\n"
                 return true
             } else {
-                println "Attempt ${attempt}: HTTP ${responseCode} - retrying..."
+                println "Attempt ${attempt}: HTTP ${out} - retrying..."
             }
         } catch (Exception e) {
             def elapsed = (System.currentTimeMillis() - startTime) / 1000
@@ -61,20 +55,18 @@ def waitForApplication(String url, int timeoutSeconds = 60, int intervalSeconds 
     }
 
     println "\n TIMEOUT: Application did not respond within ${timeoutSeconds} seconds"
-    println "  Target: ${url}"
-    println "  Total attempts: ${attempt}"
     println "============================================\n"
     return false
 }
 
-/*if (!waitForApplication(target)) {
+if (!waitForApplication(target)) {
     System.err.println "ERROR: Cannot reach target application at ${target}"
     System.err.println "Please ensure:"
     System.err.println "  1. M@RS application is running"
     System.err.println "  2. URL is correct: ${target}"
     System.err.println "  3. Network connectivity is working"
     System.exit(1)
-}*/
+}
 
 // Setup report directory
 def root = new File('reports'); root.mkdirs()
