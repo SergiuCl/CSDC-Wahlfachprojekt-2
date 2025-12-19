@@ -36,28 +36,28 @@ jobs:
     parameters:
       context: M@RS
       user: si_owasp_user
-      maxDuration: 5
+      maxDuration: 10
 
   - type: spiderAjax
     parameters:
       context: M@RS
       user: si_owasp_user
-      maxDuration: 5
+      maxDuration: 15
 
   - type: passiveScan-wait
     parameters:
-      maxDuration: 2
+      maxDuration: 5
 
   - type: activeScan
     parameters:
       context: M@RS
       user: si_owasp_user
       policy: Default Policy
-      maxRuleDurationInMins: 10
+      maxRuleDurationInMins: 15
 
   - type: passiveScan-wait
     parameters:
-      maxDuration: 2
+      maxDuration: 5
 
   - type: report
     parameters:

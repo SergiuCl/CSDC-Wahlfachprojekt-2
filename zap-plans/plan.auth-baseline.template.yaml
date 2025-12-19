@@ -43,11 +43,11 @@ jobs:
     parameters:
       context: M@RS
       user: si_owasp_user
-      maxDuration: 5
+      maxDuration: 8
 
   - type: passiveScan-wait
     parameters:
-      maxDuration: 2
+      maxDuration: 3
 
   - type: report
     parameters:

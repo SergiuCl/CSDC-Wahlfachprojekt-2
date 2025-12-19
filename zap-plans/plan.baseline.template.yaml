@@ -16,16 +16,16 @@ jobs:
   - type: spider
     parameters:
       context: "mars"
-      maxDuration: 2
+      maxDuration: 3
 
   - type: spiderAjax
     parameters:
       context: "mars"
-      maxDuration: 2
+      maxDuration: 5
 
   - type: passiveScan-wait
     parameters:
-      maxDuration: 2
+      maxDuration: 3
 
   - type: report
     parameters:

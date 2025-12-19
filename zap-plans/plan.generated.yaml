@@ -1,6 +1,6 @@
 plan:
-  title: "M@RS AF Baseline"
-  description: "Passive scan (no active attacks)"
+  title: "M@RS AF Full Scan"
+  description: "Active scan of M@RS"
   version: "1.0.0"
 
 env:
@@ -16,39 +16,45 @@ jobs:
   - type: spider
     parameters:
       context: "mars"
-      maxDuration: 2
+      maxDuration: 10
 
   - type: spiderAjax
     parameters:
       context: "mars"
-      maxDuration: 2
+      maxDuration: 15
 
   - type: passiveScan-wait
     parameters:
-      maxDuration: 2
+      maxDuration: 5
+
+  - type: activeScan
+    parameters:
+      context: "mars"
+      policy: "Default Policy"
+      maxRuleDurationInMins: 15
 
   - type: report
     parameters:
       template: "traditional-html"
-      reportDir: "/zap/wrk/reports/report-2025-11-15-4"
-      reportFile: "baseline-report.html"
-      reportTitle: "ZAP AF Baseline - M@RS"
+      reportDir: "/zap/wrk/reports/report-2025-12-16-2"
+      reportFile: "full-scan-report.html"
+      reportTitle: "ZAP AF Full Scan - M@RS"
 
   - type: report
     parameters:
       template: "traditional-json"
-      reportDir: "/zap/wrk/reports/report-2025-11-15-4"
-      reportFile: "baseline-report.json"
-      reportTitle: "ZAP AF Baseline - M@RS"
+      reportDir: "/zap/wrk/reports/report-2025-12-16-2"
+      reportFile: "full-scan-report.json"
+      reportTitle: "ZAP AF Full Scan - M@RS"
 
   - type: report
     parameters:
       template: "traditional-md"
-      reportDir: "/zap/wrk/reports/report-2025-11-15-4"
-      reportFile: "baseline-report.md"
-      reportTitle: "ZAP AF Baseline - M@RS"
+      reportDir: "/zap/wrk/reports/report-2025-12-16-2"
+      reportFile: "full-scan-report.md"
+      reportTitle: "ZAP AF Full Scan - M@RS"
 
   - type: outputSummary
     parameters:
       format: LONG
-      summaryFile: "/zap/wrk/reports/report-2025-11-15-4/baseline-summary.json"
+      summaryFile: "/zap/wrk/reports/report-2025-12-16-2/full-scan-summary.json"
