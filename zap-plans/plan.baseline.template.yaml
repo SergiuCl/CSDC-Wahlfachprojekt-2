@@ -21,11 +21,11 @@ jobs:
   - type: spiderAjax
     parameters:
       context: "mars"
-      maxDuration: 5
+      maxDuration: 2
 
   - type: passiveScan-wait
     parameters:
-      maxDuration: 3
+      maxDuration: 2
 
   - type: report
     parameters:
@@ -46,6 +46,13 @@ jobs:
       template: "traditional-md"
       reportDir: "${REPORT_DIR}"
       reportFile: "baseline-report.md"
+      reportTitle: "ZAP AF Baseline - M@RS"
+
+  - type: report
+    parameters:
+      template: "traditional-xml"
+      reportDir: "${REPORT_DIR}"
+      reportFile: "baseline-scan-report.xml"
       reportTitle: "ZAP AF Baseline - M@RS"
 
   - type: outputSummary

@@ -21,17 +21,21 @@ jobs:
   - type: spiderAjax
     parameters:
       context: "mars"
-      maxDuration: 15
+      maxDuration: 10
 
   - type: passiveScan-wait
     parameters:
-      maxDuration: 5
+      maxDuration: 10
 
   - type: activeScan
     parameters:
       context: "mars"
       policy: "Default Policy"
       maxRuleDurationInMins: 15
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 10
 
   - type: report
     parameters:
@@ -42,16 +46,9 @@ jobs:
 
   - type: report
     parameters:
-      template: "traditional-json"
+      template: "traditional-xml"
       reportDir: "${REPORT_DIR}"
-      reportFile: "full-scan-report.json"
-      reportTitle: "ZAP AF Full Scan - M@RS"
-
-  - type: report
-    parameters:
-      template: "traditional-md"
-      reportDir: "${REPORT_DIR}"
-      reportFile: "full-scan-report.md"
+      reportFile: "full-scan-report.xml"
       reportTitle: "ZAP AF Full Scan - M@RS"
 
   - type: outputSummary
