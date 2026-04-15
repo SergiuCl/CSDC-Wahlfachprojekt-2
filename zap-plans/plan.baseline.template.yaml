@@ -1,11 +1,11 @@
 plan:
-  title: "M@RS AF Baseline"
+  title: "Benchmark AF Baseline"
   description: "Passive scan (no active attacks)"
   version: "1.0.0"
 
 env:
   contexts:
-    - name: "mars"
+    - name: "benchmark"
       urls:
         - "${TARGET_URL}"
   parameters:
@@ -15,12 +15,12 @@ env:
 jobs:
   - type: spider
     parameters:
-      context: "mars"
+      context: "benchmark"
       maxDuration: 3
 
   - type: spiderAjax
     parameters:
-      context: "mars"
+      context: "benchmark"
       maxDuration: 2
 
   - type: passiveScan-wait

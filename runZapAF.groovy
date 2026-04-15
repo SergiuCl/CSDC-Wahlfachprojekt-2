@@ -2,11 +2,7 @@
 //   groovy runZapAF.groovy baseline
 //   groovy runZapAF.groovy full
 //   groovy runZapAF.groovy api
-//   groovy runZapAF.groovy baseline http://t-si.mediamid.local:8082/marsDemo
-//
-// Optional when running:
-//   TARGET_URL=https://host.docker.internal:8443/benchmark/ groovy runZapAF.groovy full
-//   OPENAPI_FILE=/zap/wrk/api-specs/mars-openapi.yml  (only for 'api')
+//   groovy runZapAF.groovy baseline https://host.docker.internal:8443/benchmark/
 
 def kind = (args.length > 0 ? args[0] : null)
 if (!["baseline","full","api","authenticated-baseline-scan","authenticated-full-scan"].contains(kind)) {
@@ -15,7 +11,7 @@ if (!["baseline","full","api","authenticated-baseline-scan","authenticated-full-
 }
 
 final target = (args.length > 1 ? args[1] : null) ?: System.getenv('TARGET_URL') ?: 'https://host.docker.internal:8443/benchmark/'
-final composeFile = 'docker-compose-mars-scan.yml'
+final composeFile = 'docker-compose-benchmark-scan.yml'
 
 def waitForApplication(String url, int timeoutSeconds = 60, int intervalSeconds = 2) {
     println "\n============================================"
